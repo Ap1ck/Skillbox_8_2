@@ -4,35 +4,38 @@ using UnityEngine;
 
 public class Distance : MonoBehaviour
 {
-    [SerializeField] private List<Transform> _allPointList;
+    [SerializeField] private List<Transform> _runners;
     [SerializeField] private float _speed;
 
-    private Vector3 _target;
-    private int _index = 0;
-    private float _distance;
-    private bool _moving;
+    private int _currentIndex;
+    private int _targetIndex;
+
+    private void Start()
+    {
+        _targetIndex = _currentIndex + 1;
+    }
 
     private void Update()
     {
-        transform.Rotate(0, 0, 1);
-        transform.LookAt(_target);
-        _target = _allPointList[_index].transform.position;
+        Transform _currentRunner = _runners[_currentIndex];
+        Transform _targetRunner = _runners[_targetIndex];
 
-        if (_moving)
+        _currentRunner.LookAt(_targetRunner.position);
+
+        _currentRunner.position = Vector3.MoveTowards(_currentRunner.position, _targetRunner.position, _speed * Time.deltaTime);
+
+        if (_currentRunner.position == _targetRunner.position)
         {
-            transform.position = Vector3.MoveTowards(transform.position, _target, _speed * Time.deltaTime);
-        }
+            _currentIndex = _targetIndex;
+            _currentRunner.LookAt(_targetRunner.position);
 
-        _distance = Vector3.Distance(transform.position, _target);
-
-        if (_distance <= 0.05f)
-        {
-            if (_allPointList[_index])
+            if (_targetIndex < _runners.Count - 1)
             {
-                if (_allPointList[_index].position == _target)
-                {
-                    _target = _allPointList[_index].position;
-                }
+                _targetIndex++;
+            }
+            else
+            {
+                _targetIndex = 0;
             }
         }
     }
